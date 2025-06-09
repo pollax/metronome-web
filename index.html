@@ -15,6 +15,22 @@
     h1 {
       font-size: 3em;
       margin: 0.5em 0;
+      display: inline-block;
+    }
+    #half-toggle {
+      font-size: 1em;
+      margin-left: 1em;
+      padding: 0.5em 1em;
+      vertical-align: top;
+      border: none;
+      border-radius: 6px;
+      background: #ccc;
+      color: #000;
+      cursor: pointer;
+    }
+    #half-toggle.active {
+      background: #007acc;
+      color: white;
     }
     .button-row {
       display: flex;
@@ -54,16 +70,14 @@
   </style>
 </head>
 <body>
-  <h1 id="bpm-display">170 bpm</h1>
+  <div>
+    <h1 id="bpm-display">170 bpm</h1>
+    <button id="half-toggle" onclick="toggleHalf()">1/2</button>
+  </div>
 
   <button id="start-button" onclick="toggleMetronome()">Start</button>
 
   <div id="controls" style="display:none;">
-    <div class="button-row">
-      <button onclick="changeVolume(-0.1)">🔉</button>
-      <button onclick="changeVolume(0.1)">🔊</button>
-    </div>
-
     <div class="button-row">
       <button onclick="changeBPM(-1)">-</button>
       <button onclick="changeBPM(1)">+</button>
@@ -86,25 +100,25 @@
     let nextClickTime = 0;
     let schedulerInterval;
     let isPlaying = false;
+    let isHalf = false;
 
     function updateDisplay() {
-      document.getElementById("bpm-display").textContent = `${bpm} bpm`;
+      const displayBPM = isHalf ? bpm / 2 : bpm;
+      document.getElementById("bpm-display").textContent = `${displayBPM} bpm`;
     }
 
     function changeBPM(delta) {
+      if (isHalf) deactivateHalf();
       bpm = Math.max(30, bpm + delta);
       interval = 60 / bpm;
       updateDisplay();
     }
 
     function setBPM(value) {
+      if (isHalf) deactivateHalf();
       bpm = value;
       interval = 60 / bpm;
       updateDisplay();
-    }
-
-    function changeVolume(delta) {
-      volume = Math.max(0, Math.min(1, volume + delta));
     }
 
     function playClick(time) {
@@ -156,6 +170,25 @@
         startBtn.textContent = "Start";
         stopMetronome();
       }
+    }
+
+    function toggleHalf() {
+      isHalf = !isHalf;
+      const btn = document.getElementById("half-toggle");
+      if (isHalf) {
+        interval = 60 / (bpm / 2);
+        btn.classList.add("active");
+      } else {
+        interval = 60 / bpm;
+        btn.classList.remove("active");
+      }
+      updateDisplay();
+    }
+
+    function deactivateHalf() {
+      isHalf = false;
+      document.getElementById("half-toggle").classList.remove("active");
+      interval = 60 / bpm;
     }
   </script>
 </body>
