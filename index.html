@@ -77,7 +77,7 @@
 
   <button id="start-button" onclick="toggleMetronome()">Start</button>
 
-  <div id="controls" style="display:none;">
+  <div id="controls">
     <div class="button-row">
       <button onclick="changeBPM(-1)">-</button>
       <button onclick="changeBPM(1)">+</button>
@@ -158,12 +158,10 @@
     async function toggleMetronome() {
       if (!audioContext) await initMetronome();
       const startBtn = document.getElementById("start-button");
-      const controls = document.getElementById("controls");
       isPlaying = !isPlaying;
 
       if (isPlaying) {
         startBtn.textContent = "Stop";
-        controls.style.display = "block";
         updateDisplay();
         startMetronome();
       } else {
