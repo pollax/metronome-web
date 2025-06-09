@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Running Metronome</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 1em;
+      margin: 0;
+      background: #fafafa;
+    }
+    h1 {
+      font-size: 3em;
+      margin: 0.5em 0;
+    }
+    .button-row {
+      display: flex;
+      margin: 0.5em 0;
+    }
+    .button-row button {
+      flex: 1;
+      font-size: 2em;
+      padding: 1em;
+      margin: 0.25em;
+      border: none;
+      border-radius: 8px;
+      background: #007acc;
+      color: white;
+    }
+    .preset-row {
+      margin-top: 1em;
+    }
+    .preset-row button {
+      font-size: 1.5em;
+      margin: 0.3em;
+      padding: 0.7em 1.2em;
+      border: none;
+      border-radius: 6px;
+      background: #888;
+      color: white;
+    }
+    #start-button {
+      font-size: 2em;
+      padding: 1em 2em;
+      margin-top: 2em;
+      border: none;
+      border-radius: 8px;
+      background: #28a745;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="bpm-display">170 bpm</h1>
+
+  <button id="start-button" onclick="toggleMetronome()">Start</button>
+
+  <div id="controls" style="display:none;">
+    <div class="button-row">
+      <button onclick="changeVolume(-0.1)">🔉</button>
+      <button onclick="changeVolume(0.1)">🔊</button>
+    </div>
+
+    <div class="button-row">
+      <button onclick="changeBPM(-1)">-</button>
+      <button onclick="changeBPM(1)">+</button>
+    </div>
+
+    <div class="preset-row">
+      <button onclick="setBPM(165)">165</button>
+      <button onclick="setBPM(170)">170</button>
+      <button onclick="setBPM(175)">175</button>
+      <button onclick="setBPM(180)">180</button>
+    </div>
+  </div>
+
+  <script>
+    let bpm = 170;
+    let volume = 0.5;
+    let interval = 60 / bpm;
+    let audioContext;
+    let clickBuffer;
+    let nextClickTime = 0;
+    let schedulerInterval;
+    let isPlaying = false;
+
+    function updateDisplay() {
+      document.getElementById("bpm-display").textContent = `${bpm} bpm`;
+    }
+
+    function changeBPM(delta) {
+      bpm = Math.max(30, bpm + delta);
+      interval = 60 / bpm;
+      updateDisplay();
+    }
+
+    function setBPM(value) {
+      bpm = value;
+      interval = 60 / bpm;
+      updateDisplay();
+    }
+
+    function changeVolume(delta) {
+      volume = Math.max(0, Math.min(1, volume + delta));
+    }
+
+    function playClick(time) {
+      const source = audioContext.createBufferSource();
+      const gain = audioContext.createGain();
+      gain.gain.value = volume;
+      source.buffer = clickBuffer;
+      source.connect(gain).connect(audioContext.destination);
+      source.start(time);
+    }
+
+    function scheduler() {
+      while (nextClickTime < audioContext.currentTime + 0.1) {
+        playClick(nextClickTime);
+        nextClickTime += interval;
+      }
+    }
+
+    async function initMetronome() {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      clickBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.05, audioContext.sampleRate);
+      const data = clickBuffer.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = Math.sin(2 * Math.PI * 800 * i / audioContext.sampleRate) * (1 - i / data.length);
+      }
+    }
+
+    function startMetronome() {
+      nextClickTime = audioContext.currentTime;
+      schedulerInterval = setInterval(scheduler, 25);
+    }
+
+    function stopMetronome() {
+      clearInterval(schedulerInterval);
+    }
+
+    async function toggleMetronome() {
+      if (!audioContext) await initMetronome();
+      const startBtn = document.getElementById("start-button");
+      const controls = document.getElementById("controls");
+      isPlaying = !isPlaying;
+
+      if (isPlaying) {
+        startBtn.textContent = "Stop";
+        controls.style.display = "block";
+        updateDisplay();
+        startMetronome();
+      } else {
+        startBtn.textContent = "Start";
+        stopMetronome();
+      }
+    }
+  </script>
+</body>
+</html>
