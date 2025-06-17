@@ -13,8 +13,10 @@
     }
     .container {
       height: 100%;
+      width: 100vw;
       scroll-snap-type: y mandatory;
       overflow-y: scroll;
+      overflow-x: hidden;
     }
     .page {
       height: 100vh;
@@ -24,9 +26,14 @@
       justify-content: center;
       align-items: center;
       scroll-snap-align: start;
+      box-sizing: border-box;
+      padding: 1em;
+      overflow-x: hidden;
     }
     .controls {
-      padding: 1em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     h1 {
       font-size: 3em;
@@ -46,12 +53,16 @@
       background: #007acc;
       color: white;
     }
-    .button-row {
+    .button-row, .preset-row {
       display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       margin: 0.5em 0;
+      width: 100%;
+      max-width: 500px;
     }
-    .button-row button {
-      flex: 1;
+    .button-row button, .preset-row button {
+      flex: 1 1 40%;
       font-size: 2em;
       padding: 1em;
       margin: 0.25em;
@@ -59,23 +70,17 @@
       border-radius: 8px;
       background: #007acc;
       color: white;
-    }
-    .preset-row {
-      margin-top: 1em;
+      min-width: 100px;
+      box-sizing: border-box;
     }
     .preset-row button {
       font-size: 1.5em;
-      margin: 0.3em;
-      padding: 0.7em 1.2em;
-      border: none;
-      border-radius: 6px;
       background: #888;
-      color: white;
     }
     #start-button {
       font-size: 2em;
       padding: 1em 2em;
-      margin-top: 2em;
+      margin-top: 1em;
       border: none;
       border-radius: 8px;
       background: #28a745;
